@@ -16,11 +16,18 @@ module.exports.run = function (worker) {
   console.log('   >> Worker PID:', process.pid);
 
   var app = require('express')();
+  app.set('view engine', 'jade');
+  app.set('views', './views');
+  app.use(serveStatic(path.resolve(__dirname, 'public')));
 
   var httpServer = worker.httpServer;
   var scServer = worker.scServer;
-
-  app.use(serveStatic(path.resolve(__dirname, 'public')));
+  
+  app.get('/', function(req, res) {
+    res.render('index', { 
+      googleMapsApiKey: config.googleMapsApiKey
+    });
+  });
 
   httpServer.on('request', app);
 

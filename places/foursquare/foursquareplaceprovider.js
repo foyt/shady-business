@@ -3,6 +3,7 @@
 
   var _ = require("underscore");
   var config = require(__dirname + '/../../config.json');
+  var db = require(__dirname + '/../../db/db.js');
   var model = require(__dirname + '/../../model/model.js');
   var PlaceProvider = require(__dirname + '/../placeprovider.js');
   
@@ -27,6 +28,8 @@
               var categories = _.map(venue.categories, function (category) {
                 return new model.Category('foursquare', category.id, category.name, category.icon.prefix + 'bg_32' + category.icon.suffix);
               });
+              
+              db.persistCategories(categories, function () { });
           
               var location = new model.Location(
                   venue.location.lat, 

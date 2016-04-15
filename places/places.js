@@ -26,7 +26,7 @@
         if (err) {
           mainCallback(err);
         } else {
-          mainCallback(null, _.union(results));
+          mainCallback(null, _.flatten(results, true));
         }
       });
     }

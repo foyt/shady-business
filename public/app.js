@@ -13,18 +13,14 @@
     },
     
     _onDiscoveredPlaces: function (event, data) {
-      console.log(data.venues);
-      
-      $.each(data.venues, $.proxy(function (index, venue) {
-        if (venue.categories.length) {
-          var icon = venue.categories[0].icon.prefix + 'bg_32' + venue.categories[0].icon.suffix;
-          
+      $.each(data.places, $.proxy(function (index, place) {
+        if (place.categories.length) {
           var marker = new google.maps.Marker({
-            position: { lat: venue.location.lat, lng: venue.location.lng },
+            position: { lat: place.location.latitude, lng: place.location.longitude },
             map: this._map,
             animation: google.maps.Animation.DROP,
-            title: venue.name,
-            icon: icon
+            title: place.name,
+            icon: place.categories[0].icon
           });
         }
       }, this));
@@ -60,7 +56,9 @@
     },
     
     _onDiscoveredPlaces: function (data) {
-      $(document).trigger("discoveredPlaces", data);
+      $(document).trigger("discoveredPlaces", {
+        places: data
+      });
     },
     
     _onGeoLocationChange: function (event, data) {

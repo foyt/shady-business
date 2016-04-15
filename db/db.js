@@ -65,22 +65,22 @@
         var data = {
           id: id,
           source: source,
-          name: name,
-          description: description,
-          url: url,
-          categories: categoryUuids,
-          tags: tags,
-          locationLatitude: locationLatitude,
-          locationLongitude: locationLongitude,
-          locationAccurate: locationAccurate,
-          locationStreetAddress: locationStreetAddress,
-          locationCrossStreet: locationCrossStreet,
-          locationCity: locationCity,
-          locationState: locationState,
-          locationPostalCode: locationPostalCode,
-          locationCountry: locationCountry,
-          priceLevel: priceLevel,
-          priceMessage: priceMessage,
+          name: name||'',
+          description: description||'',
+          url: url||'',
+          categories: categoryUuids||[],
+          tags: tags||[],
+          locationLatitude: locationLatitude||null,
+          locationLongitude: locationLongitude||null,
+          locationAccurate: locationAccurate||false,
+          locationStreetAddress: locationStreetAddress||'',
+          locationCrossStreet: locationCrossStreet||'',
+          locationCity: locationCity||'',
+          locationState: locationState||'',
+          locationPostalCode: locationPostalCode||'',
+          locationCountry: locationCountry||'',
+          priceLevel: priceLevel||null,
+          priceMessage: priceMessage||''
         };
         
         var columns = _.keys(data);
@@ -106,31 +106,34 @@
         callback(err);
       } else {
         var data = {
-          name: name,
-          description: description,
-          url: url,
-          categories: categoryUuids,
-          tags: tags,
-          locationLatitude: locationLatitude,
-          locationLongitude: locationLongitude,
-          locationAccurate: locationAccurate,
-          locationStreetAddress: locationStreetAddress,
-          locationCrossStreet: locationCrossStreet,
-          locationCity: locationCity,
-          locationState: locationState,
-          locationPostalCode: locationPostalCode,
-          locationCountry: locationCountry,
+          name: name||'',
+          description: description||'',
+          url: url||'',
+          categories: categoryUuids||[],
+          tags: tags||[],
+          locationLatitude: locationLatitude||'',
+          locationLongitude: locationLongitude||'',
+          locationAccurate: locationAccurate||false,
+          locationStreetAddress: locationStreetAddress||'',
+          locationCrossStreet: locationCrossStreet||'',
+          locationCity: locationCity||'',
+          locationState: locationState||'',
+          locationPostalCode: locationPostalCode||'',
+          locationCountry: locationCountry||'',
           priceLevel: priceLevel,
-          priceMessage: priceMessage,
+          priceMessage: priceMessage||''
         };
         
         var columns = _.map(_.keys(data), function (key) {
           return key + ' = ?';
         });
         
-        var query = util.format('update Place set (%s) where source = ? and id = ?', columns.join(','));
-
-        client.execute(query, _.union(_.values(data), [source, id]), mainCallback);
+        var query = util.format('update Place set %s where source = ? and id = ?', columns.join(','));
+        var params = _.values(data).concat([source, id]);
+         
+        client.execute(query, params, function (err, result) {
+          mainCallback(err, result);
+        });
       }
     });
   };
@@ -170,7 +173,7 @@
           });
           
           async.parallel(operations, function (err, results) {
-            mainCallback(err, results);
+            mainCallback(err, places);
           });
         }
       });
@@ -193,7 +196,9 @@
         };
       });
       
-      async.parallel(operations, mainCallback);
+      async.parallel(operations, function (err) {
+        mainCallback(err, categories);
+      });
     }
   
   };

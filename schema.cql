@@ -33,7 +33,7 @@ create table Place (
   locationState text,
   locationPostalCode text,
   locationCountry text,
-  priceLevel int,
+  priceLevel text,
   priceMessage text,
   PRIMARY KEY (source,id)
 );

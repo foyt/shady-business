@@ -14,7 +14,8 @@
     "jade": "1.11.0",
     "underscore": "1.8.3",
     "cassandra-driver": "3.0.2",
-    "async": "2.0.0-rc.3"
+    "async": "2.0.0-rc.3",
+    "elasticsearch": "11.0.1"
   },
   "readmeFilename": "README.md"
 }

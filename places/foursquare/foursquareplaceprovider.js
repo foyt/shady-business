@@ -4,6 +4,7 @@
   var _ = require("underscore");
   var config = require(__dirname + '/../../config.json');
   var db = require(__dirname + '/../../db/db.js');
+  var index = require(__dirname + '/../../index/index.js');
   var model = require(__dirname + '/../../model/model.js');
   var PlaceProvider = require(__dirname + '/../placeprovider.js');
   
@@ -39,6 +40,24 @@
                   venue.location.state, 
                   venue.location.postalCode, 
                   venue.location.country);
+                  
+              var priceLevel = null;
+              if (venue.price && venue.price.tier) {
+                switch (venue.price.tier) {
+                  case 1: 
+                    priceLevel = 'CHEAP';
+                  break;
+                  case 2: 
+                    priceLevel = 'MID';
+                  break;
+                  case 3: 
+                    priceLevel = 'PRICY';
+                  break;
+                  case 4: 
+                    priceLevel = 'LUXURY';
+                  break;
+                }
+              }
               
               return new model.Place('foursquare', 
                   venue.id, 
@@ -48,7 +67,7 @@
                   categories, 
                   venue.url, 
                   location, 
-                  venue.price ? venue.price.tier : null,
+                  priceLevel,
                   venue.price ? venue.price.message : null
               );
             } else {
@@ -56,7 +75,13 @@
             }
           });
         
-          db.persistPlaces(places, function () { });
+          db.persistPlaces(places, function (err, places) { 
+            if (err) {
+              console.error(err);
+            } else {
+              index.indexPlaces(places);
+            }
+          });
           
           callback(null, places);
         }

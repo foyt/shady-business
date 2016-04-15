@@ -3,14 +3,7 @@ var express = require('express');
 var serveStatic = require('serve-static');
 var path = require('path');
 var config = require('./config.json');
-
-var foursquare = require('node-foursquare')({
-  'secrets' : {
-    'clientId' : config.foursquareClientId,
-    'clientSecret' : config.foursquareClientSecret,
-    'redirectUrl' : 'REDIRECT_URL'
-  }
-});
+var places = require('./places/places.js');
 
 module.exports.run = function (worker) {
   console.log('   >> Worker PID:', process.pid);
@@ -33,14 +26,14 @@ module.exports.run = function (worker) {
 
   scServer.on('connection', function (socket) {
     socket.on('searchPlaces', function (data) {
-      foursquare.Venues.search(data.latitude, data.longitude, null, {}, null, function (err, results) {
+      places.search(data.latitude, data.longitude, function (err, places) {
         if (err) {
           // todo: handle err
         } else {
-          socket.emit('discoveredPlaces', results);
+          console.log(JSON.stringify(places));
+          socket.emit('discoveredPlaces', places);
         }
       });
-      
     });
     
   });

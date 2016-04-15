@@ -2,9 +2,11 @@
   'use strict';
   
   var Category = class {
-    constructor(id, name) {
+    constructor(source, id, name, icon) {
+      this.source = source;
       this.id = id;
       this.name = name;
+      this.icon = icon;
     }
   }
   

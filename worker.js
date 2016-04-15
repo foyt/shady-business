@@ -29,8 +29,8 @@ module.exports.run = function (worker) {
       places.search(data.latitude, data.longitude, function (err, places) {
         if (err) {
           // todo: handle err
+          console.log(err);
         } else {
-          console.log(JSON.stringify(places));
           socket.emit('discoveredPlaces', places);
         }
       });

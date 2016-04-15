@@ -23,14 +23,12 @@
         if (err) {
           callback(err);
         } else {
-          callback(null, _.map(results.venues, function (venue) {
+          var places = _.map(results.venues, function (venue) {
             if (venue && venue.location) {
               var categories = _.map(venue.categories, function (category) {
                 return new model.Category('foursquare', category.id, category.name, category.icon.prefix + 'bg_32' + category.icon.suffix);
               });
               
-              db.persistCategories(categories, function () { });
-          
               var location = new model.Location(
                   venue.location.lat, 
                   venue.location.lng, 
@@ -56,7 +54,11 @@
             } else {
               return null;
             }
-          }));
+          });
+        
+          db.persistPlaces(places, function () { });
+          
+          callback(null, places);
         }
       })
     }

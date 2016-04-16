@@ -20,7 +20,9 @@
 
     search (latitude, longitude, callback) {
       
-      foursquare.Venues.search(latitude, longitude, null, {}, null, function (err, results) {
+      foursquare.Venues.search(latitude, longitude, null, {
+        limit: 50
+      }, null, function (err, results) {
         if (err) {
           callback(err);
         } else {

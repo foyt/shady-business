@@ -1,28 +1,22 @@
-CREATE KEYSPACE shadybussiness WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-USE shadybussiness;
+CREATE KEYSPACE shadybusiness WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+USE shadybusiness;
 
 DROP TABLE IF EXISTS Place;
 DROP TABLE IF EXISTS Category;
 
 create table Category (
-  uuid uuid,
   id text,
-  source text,
   name text,
   icon text,  
-  PRIMARY KEY (source,id)
+  PRIMARY KEY (id)
 );
 
-create index category_uuid on Category (uuid);
-
 create table Place (
-  uuid uuid,
   id text,
-  source text,
   name text,
   description text,
   url text,
-  categories list<uuid>,
+  categories list<text>,
   tags list<text>,
   locationLatitude double,
   locationLongitude double,
@@ -35,7 +29,5 @@ create table Place (
   locationCountry text,
   priceLevel text,
   priceMessage text,
-  PRIMARY KEY (source,id)
+  PRIMARY KEY (id)
 );
-
-create index place_uuid on Place (uuid);

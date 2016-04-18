@@ -17,9 +17,8 @@
   });
   
   class FoursquarePlaceProvider extends PlaceProvider {
-
+     
     search (latitude, longitude, callback) {
-      
       foursquare.Venues.search(latitude, longitude, null, {
         limit: 50
       }, null, function (err, results) {
@@ -29,7 +28,7 @@
           var places = _.map(results.venues, function (venue) {
             if (venue && venue.location) {
               var categories = _.map(venue.categories, function (category) {
-                return new model.Category('foursquare', category.id, category.name, category.icon.prefix + 'bg_32' + category.icon.suffix);
+                return new model.Category('foursquare-' + category.id, category.name, category.icon.prefix + 'bg_32' + category.icon.suffix);
               });
               
               var location = new model.Location(
@@ -61,8 +60,7 @@
                 }
               }
               
-              return new model.Place('foursquare', 
-                  venue.id, 
+              return new model.Place('foursquare-' + venue.id, 
                   venue.name, 
                   venue.description, 
                   venue.tags, 
@@ -77,7 +75,7 @@
             }
           });
         
-          db.persistPlaces(places, function (err, places) { 
+          db.Places.persist(places, function (err, places) { 
             if (err) {
               console.error(err);
             } else {

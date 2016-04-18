@@ -28,7 +28,10 @@
       body : {
         properties : {
           location: {
-            type : "geo_point"
+            type : "geo_point",
+            "fielddata" : {
+              "precision" : "1m"
+            }
           }
         }
       }
@@ -38,7 +41,7 @@
   function prepareIndex() {
     indexExists(function (err, exists) {
       if (err) {
-        console.err(err);
+        console.error(err);
       } else {
         if (!exists) {
           createIndex(function () {
@@ -65,7 +68,7 @@
     client.index({
       index: 'shadybussiness',
       type: 'place',
-      id: place.source + '-' + place.id,
+      id: place.id,
       body: {
         name: place.name,
         description: place.description,
@@ -77,11 +80,35 @@
     });
   }
   
+  function searchPlacesNear(latitude, longitude, callback) {
+    client.search({
+      index: 'shadybussiness',
+      type: 'place',
+      body: {
+        query: {
+          filtered: {
+            filter: {
+              geo_distance: {
+                "distance": '10km',
+                "location": [latitude, longitude]
+              }
+            }
+          }
+        }
+      }
+    }).then(function (response) {
+      callback(null, response);
+    }).catch(function (error) {
+      callback(error);
+    });
+  }
+  
   prepareIndex();
   
   module.exports = {
     indexPlace: indexPlace,
-    indexPlaces: indexPlaces
+    indexPlaces: indexPlaces,
+    searchPlacesNear: searchPlacesNear
   };
   
 }).call(this);

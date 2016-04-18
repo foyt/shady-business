@@ -2,8 +2,7 @@
   'use strict';
   
   var Category = class {
-    constructor(source, id, name, icon) {
-      this.source = source;
+    constructor(id, name, icon) {
       this.id = id;
       this.name = name;
       this.icon = icon;
@@ -25,8 +24,7 @@
   }
   
   var Place = class {
-    constructor(source, id, name, description, tags, categories, url, location, priceLevel, priceMessage) {
-      this.source = source;
+    constructor(id, name, description, tags, categories, url, location, priceLevel, priceMessage) {
       this.id = id;
       this.name = name; 
       this.description = description; 

@@ -2,13 +2,25 @@
   'use strict';
   
   $.widget("custom.map", {
+    options: {
+      followInterval: 1,
+      changeInterval: 500
+    },
+    
     _create : function() {
       this._map = new google.maps.Map(this.element[0], {
         center: { lat: -34.397, lng: 150.644 },
-        zoom: 6
+        zoom: 15
       });
       
-      $(document).on("geoLocationChange", $.proxy(this._onGeoLocationChange, this));
+      this._center = null;
+      this._northEast = null;
+      this._southWest = null;
+      this._current = null;
+      
+      this._map.addListener("bounds_changed", $.proxy(this._onBoundsChanged, this));
+      this._map.addListener("dragend", $.proxy(this._onDragEnd, this));
+      navigator.geolocation.watchPosition($.proxy(this._onGeoLocationChange, this));
       $(document).on("discoveredPlaces", $.proxy(this._onDiscoveredPlaces, this));
     },
     
@@ -26,28 +38,86 @@
       }, this));
     },
     
-    _onGeoLocationChange: function (event, data) {
-      this._map.setCenter({
-        lat: data.coords.latitude,
-        lng: data.coords.longitude
-      });
+    _onGeoLocationChange: function (position) {
+      var current = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      };
       
-      this._map.setZoom(15);
+      if (!this._current || this._getDistance(current, this._current) > this.options.followInterval) {
+        this._current = current;
+        
+        this._map.setCenter({
+          lat: current.latitude,
+          lng: current.longitude
+        });
+      }
+    },
+    
+    _convertLatLng: function (latLng) {
+      return {
+        latitude: latLng.lat(),
+        longitude: latLng.lng()
+      };
+    },
+    
+    _getDistance: function (l1, l2) {
+      return geolib.getDistance(l1, l2);
+    },
+    
+    _triggerLocationChange: function () {
+      var bounds = this._map.getBounds();
+      var center = this._convertLatLng(bounds.getCenter());
+      var northEast = this._convertLatLng(bounds.getNorthEast());
+      var southWest = this._convertLatLng(bounds.getSouthWest());
+      var data = {
+        center: center,
+        northEast: northEast,
+        southWest: southWest
+      };
+      
+      if (this._center) {
+        data.centerChange = this._getDistance(this._center, center);
+      }
+
+      if (this._northEast) {
+        data.northEastChange = this._getDistance(this._northEast, northEast);
+      }
+
+      if (this._southWest) {
+        data.southWestChange = this._getDistance(this._southWest, southWest);
+      }
+      
+      var hasChanges = data.southWestChange && data.northEastChange && data.centerChange;
+      var maxChange = Math.max(data.southWestChange, data.northEastChange, data.centerChange);
+      
+      if (!hasChanges || maxChange > this.options.changeInterval) {
+        this._center = center;
+        this._northEast = northEast;
+        this._southWest = southWest;
+        
+        $(document).trigger("mapLocationChange", data);
+      }
+    },
+    
+    _onBoundsChanged: function () {
+      this._triggerLocationChange();
+    },
+    
+    _onDragEnd: function (event) {
+      this._triggerLocationChange();
     }
   });  
   
   $.widget("custom.client", {
     _create : function() {
       this._connected = false;
-      this._latitude = null;
-      this._longitude = null;
       
       this._socket = socketCluster.connect();
       
       this._socket.on('connect', $.proxy(this._onSocketConnect, this));
       this._socket.on('discoveredPlaces', $.proxy(this._onDiscoveredPlaces, this));
-
-      $(document).on("geoLocationChange", $.proxy(this._onGeoLocationChange, this));
+      $(document).on("mapLocationChange", $.proxy(this._onMapLocationChange, this));
     },
     
     _onSocketConnect: function (event) {
@@ -61,28 +131,15 @@
       });
     },
     
-    _onGeoLocationChange: function (event, data) {
-      if (this._connected) {
-        if ((data.coords.latitude != this._latitude) && (this._longitude != data.coords.longitude)) {
-          this._latitude = data.coords.latitude;
-          this._longitude = data.coords.longitude;
-          
-          this._socket.emit('searchPlaces', {
-            latitude: this._latitude,
-            longitude: this._longitude
-          });
-        }
-      }
+    _onMapLocationChange: function (event, data) {
+      this._socket.emit('searchPlaces', {
+        latitude: data.center.latitude,
+        longitude: data.center.longitude
+      });
     }
   });
   
   $(document).ready(function () {
-    navigator.geolocation.watchPosition(function(position) {
-      $(document).trigger("geoLocationChange", {
-        coords: position.coords
-      });
-    });
-    
     $('#map').map();
     
     $(document.body).client();

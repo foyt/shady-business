@@ -73,7 +73,15 @@
       var data = {
         center: center,
         northEast: northEast,
-        southWest: southWest
+        southWest: southWest,
+        topLeft: {
+          latitude: northEast.latitude,
+          longitude: southWest.longitude
+        },
+        bottomRight: {
+          latitude: southWest.latitude,
+          longitude: northEast.longitude
+        }
       };
       
       if (this._center) {
@@ -87,6 +95,8 @@
       if (this._southWest) {
         data.southWestChange = this._getDistance(this._southWest, southWest);
       }
+      
+      
       
       var hasChanges = data.southWestChange && data.northEastChange && data.centerChange;
       var maxChange = Math.max(data.southWestChange, data.northEastChange, data.centerChange);
@@ -133,8 +143,8 @@
     
     _onMapLocationChange: function (event, data) {
       this._socket.emit('searchPlaces', {
-        latitude: data.center.latitude,
-        longitude: data.center.longitude
+        topLeft: data.topLeft,
+        bottomRight: data.bottomRight
       });
     }
   });

@@ -18,9 +18,12 @@
   
   class FoursquarePlaceProvider extends PlaceProvider {
      
-    search (latitude, longitude, callback) {
-      foursquare.Venues.search(latitude, longitude, null, {
-        limit: 50
+    search (topLeft, bottomRight, callback) {
+      foursquare.Venues.search(null, null, null, {
+        limit: 50,
+        intent: 'browse',
+        sw: [bottomRight.latitude, topLeft.longitude].join(','),
+        ne: [topLeft.latitude,  bottomRight.longitude].join(',')
       }, null, function (err, results) {
         if (err) {
           callback(err);

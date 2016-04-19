@@ -26,7 +26,7 @@ module.exports.run = function (worker) {
 
   scServer.on('connection', function (socket) {
     socket.on('searchPlaces', function (data) {
-      places.search(data.latitude, data.longitude, function (err, places) {
+      places.search(data.topLeft, data.bottomRight, function (err, places) {
         if (err) {
           // todo: handle err
           console.log(err);

@@ -17,25 +17,27 @@
       
     }
     
-    _searchFromIndex (latitude, longitude, callback) {
-      index.searchPlacesNear(latitude, longitude, function (err, response) {
+    _searchFromIndex (topLeft, bottomRight, callback) {
+      index.searchPlaces(topLeft, bottomRight, function (err, response) {
         if (err) {
           callback(err);
         } else {
           if (response && response.hits) {
-            var ids =_.pluck(response.hits.hits, '_id');
+            var ids = _.pluck(response.hits.hits, '_id');
             db.Places.load(ids, function (err, places) {
               callback(err, places);
             });
+          } else {
+            callback(null, []);
           }
         }
       });
     }
     
-    _searchFromProviders (latitude, longitude, callback) {
+    _searchFromProviders (topLeft, bottomRight, callback) {
       var calls = _.map(placeProviders, function (placeProvider) {
         return function (providerPallback) {
-          placeProvider.search(latitude, longitude, providerPallback);
+          placeProvider.search(topLeft, bottomRight, providerPallback);
         }
       });
       
@@ -48,15 +50,15 @@
       });
     }
     
-    search (latitude, longitude, mainCallback) {
-      this._searchFromIndex(latitude, longitude, function (indexErr, searchResults) {
+    search (topLeft, bottomRight, mainCallback) {
+      this._searchFromIndex(topLeft, bottomRight, function (indexErr, searchResults) {
         if (indexErr) {
           mainCallback(indexErr);
         } else {
           if (searchResults && searchResults.length) {
             mainCallback(null, searchResults);
           } else {
-            this._searchFromProviders(latitude, longitude, function (providerErr, providerResults) {
+            this._searchFromProviders(topLeft, bottomRight, function (providerErr, providerResults) {
               if (providerErr) {
                 mainCallback(providerErr);
               } else {

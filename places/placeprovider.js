@@ -8,7 +8,7 @@
       
     }
     
-    search (latitude, longitude, callback) {
+    search (topLeft, bottomRight, callback) {
       
     }
     

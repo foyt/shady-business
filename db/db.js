@@ -185,31 +185,35 @@
     }
     
     static load (ids, mainCallback) {
-      this.listRows(ids, function (err, rows) {
-        if (err) {
-          mainCallback(err);
-        } else {
-          var categoryIds = _.uniq(_.compact(_.flatten(_.pluck(rows, 'categories'))));
-          Categories.load(categoryIds, function (catErr, categories) {
-            if (catErr) {
-              mainCallback(catErr);
-            } else {
-              var categoryMap = _.indexBy(categories, 'id');
-              
-              mainCallback(null, _.map(rows, function (row) {
-                var categories = _.map(row['categories']||[], function (categoryId) {
-                  return categoryMap[categoryId];
-                });
-
-                var location = new model.Location(row['locationlatitude'], row['locationlongitude'], row['locationaccurate'], row['locationstreetaddress'], 
-                  row['locationcrossstreet'], row['locationcity'], row['locationstate'], row['locationpostalcode'], row['locationcountry']);
+      if (ids && ids.length) {
+        this.listRows(ids, function (err, rows) {
+          if (err) {
+            mainCallback(err);
+          } else {
+            var categoryIds = _.uniq(_.compact(_.flatten(_.pluck(rows, 'categories'))));
+            Categories.load(categoryIds, function (catErr, categories) {
+              if (catErr) {
+                mainCallback(catErr);
+              } else {
+                var categoryMap = _.indexBy(categories, 'id');
                 
-                return new model.Place(row['id'], row['name'], row['description'], row['tags'], categories, row['url'], location, row['pricelevel'], row['pricemessage']);
-              }));
-            }
-          });
-        }
-      });
+                mainCallback(null, _.map(rows, function (row) {
+                  var categories = _.map(row['categories']||[], function (categoryId) {
+                    return categoryMap[categoryId];
+                  });
+  
+                  var location = new model.Location(row['locationlatitude'], row['locationlongitude'], row['locationaccurate'], row['locationstreetaddress'], 
+                    row['locationcrossstreet'], row['locationcity'], row['locationstate'], row['locationpostalcode'], row['locationcountry']);
+                  
+                  return new model.Place(row['id'], row['name'], row['description'], row['tags'], categories, row['url'], location, row['pricelevel'], row['pricemessage']);
+                }));
+              }
+            });
+          }
+        });
+      } else {
+        mainCallback(null, []);
+      }
     }
     
     static persist (places, mainCallback) {

@@ -118,9 +118,11 @@
           query: {
             filtered: {
               filter: {
-                geo_bounding_box: {
-                  "top_left" : topLeft,
-                  "bottom_right" : bottomRight
+                "geo_bounding_box": {
+                  "location": {
+                    "top_left" : [topLeft.latitude, topLeft.longitude],
+                    "bottom_right" : [bottomRight.latitude, bottomRight.longitude]
+                  }
                 }
               }
             }

@@ -8,18 +8,15 @@
     },
     
     _create : function() {
-      this._map = new google.maps.Map(this.element[0], {
-        center: { lat: -34.397, lng: 150.644 },
-        zoom: 15
-      });
+      this._map = L.map(this.element[0]).setView([51.505, -0.09], 13);
+      this._map.addLayer(new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'));
       
       this._center = null;
       this._northEast = null;
       this._southWest = null;
       this._current = null;
+      this._map.on("move", $.proxy(this._onMove, this));
       
-      this._map.addListener("bounds_changed", $.proxy(this._onBoundsChanged, this));
-      this._map.addListener("dragend", $.proxy(this._onDragEnd, this));
       navigator.geolocation.watchPosition($.proxy(this._onGeoLocationChange, this));
       $(document).on("discoveredPlaces", $.proxy(this._onDiscoveredPlaces, this));
     },
@@ -27,13 +24,12 @@
     _onDiscoveredPlaces: function (event, data) {
       $.each(data.places, $.proxy(function (index, place) {
         if (place.categories.length) {
-          var marker = new google.maps.Marker({
-            position: { lat: place.location.latitude, lng: place.location.longitude },
-            map: this._map,
-            animation: google.maps.Animation.DROP,
-            title: place.name,
-            icon: place.categories[0].icon
-          });
+          var marker = L.marker([place.location.latitude, place.location.longitude], {
+            icon: L.icon({
+              iconUrl: place.categories[0].icon
+            }),
+            title: place.name
+          }).addTo(this._map);
         }
       }, this));
     },
@@ -46,18 +42,14 @@
       
       if (!this._current || this._getDistance(current, this._current) > this.options.followInterval) {
         this._current = current;
-        
-        this._map.setCenter({
-          lat: current.latitude,
-          lng: current.longitude
-        });
+        this._map.setView([current.latitude, current.longitude], 13);
       }
     },
     
     _convertLatLng: function (latLng) {
       return {
-        latitude: latLng.lat(),
-        longitude: latLng.lng()
+        latitude: latLng.lat,
+        longitude: latLng.lng
       };
     },
     
@@ -70,6 +62,7 @@
       var center = this._convertLatLng(bounds.getCenter());
       var northEast = this._convertLatLng(bounds.getNorthEast());
       var southWest = this._convertLatLng(bounds.getSouthWest());
+
       var data = {
         center: center,
         northEast: northEast,
@@ -96,8 +89,6 @@
         data.southWestChange = this._getDistance(this._southWest, southWest);
       }
       
-      
-      
       var hasChanges = data.southWestChange && data.northEastChange && data.centerChange;
       var maxChange = Math.max(data.southWestChange, data.northEastChange, data.centerChange);
       
@@ -110,11 +101,7 @@
       }
     },
     
-    _onBoundsChanged: function () {
-      this._triggerLocationChange();
-    },
-    
-    _onDragEnd: function (event) {
+    _onMove: function () {
       this._triggerLocationChange();
     }
   });  
@@ -132,7 +119,6 @@
     },
     
     _onSocketConnect: function (event) {
-      console.log("CONNECTED!");
       this._connected = true;
     },
     

@@ -122,6 +122,7 @@
   $.widget("custom.client", {
     _create : function() {
       this._connected = false;
+      this._knownPlaceIds = [];
       
       this._socket = socketCluster.connect();
       
@@ -135,9 +136,15 @@
       this._connected = true;
     },
     
-    _onDiscoveredPlaces: function (data) {
+    _onDiscoveredPlaces: function (places) {
+      var newPlaces = _.filter(places, $.proxy(function (place) {
+        return _.indexOf(this._knownPlaceIds, place.id) == -1;
+      }, this));
+      
+      this._knownPlaceIds = this._knownPlaceIds.concat(_.pluck(newPlaces, "id"));
+      
       $(document).trigger("discoveredPlaces", {
-        places: data
+        places: newPlaces
       });
     },
     

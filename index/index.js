@@ -18,19 +18,19 @@
     
     _indexExists (callback) {
       this._client.indices.exists({
-        index: 'shadybussiness'
+        index: 'shadybusiness'
       }, callback);
     } 
     
     _createIndex(callback) {
       this._client.indices.create({
-        index: 'shadybussiness'
+        index: 'shadybusiness'
       }, callback);
     }
     
     _updateMapping() {
       this._client.indices.putMapping({
-        index: 'shadybussiness',
+        index: 'shadybusiness',
         type: 'place',
         body : {
           properties : {
@@ -73,7 +73,7 @@
     
     indexPlace(place, callback) {
       this._client.index({
-        index: 'shadybussiness',
+        index: 'shadybusiness',
         type: 'place',
         id: place.id,
         body: {
@@ -89,7 +89,7 @@
     
     searchPlacesNear(latitude, longitude, callback) {
       this._client.search({
-        index: 'shadybussiness',
+        index: 'shadybusiness',
         type: 'place',
         body: {
           query: {
@@ -112,7 +112,7 @@
     
     searchPlaces(topLeft, bottomRight, callback) {
       this._client.search({
-        index: 'shadybussiness',
+        index: 'shadybusiness',
         type: 'place',
         body: {
           query: {

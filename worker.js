@@ -2,9 +2,13 @@ var fs = require('fs');
 var express = require('express');
 var serveStatic = require('serve-static');
 var path = require('path');
-var config = require('./config.json');
-var places = require('./places/places.js');
-
+var config = require(__dirname + '/config.json');
+var places = require(__dirname + '/places/places.js');
+var Scanner = require(__dirname + '/scanner/scanner.js');
+var PlacePersister = require(__dirname + '/places/persister.js');
+var PlaceIndexer = require(__dirname + '/places/indexer.js');
+var Logger = require(__dirname + '/logger/logger.js');
+  
 module.exports.run = function (worker) {
   console.log('   >> Worker PID:', process.pid);
 
@@ -15,10 +19,12 @@ module.exports.run = function (worker) {
 
   var httpServer = worker.httpServer;
   var scServer = worker.scServer;
+  var scanner = new Scanner();
+  var placePersister = new PlacePersister();
+  var placeIndexer = new PlaceIndexer();
   
   app.get('/', function(req, res) {
     res.render('index', { 
-      googleMapsApiKey: config.googleMapsApiKey
     });
   });
 

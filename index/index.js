@@ -83,7 +83,10 @@
           location: [place.location.latitude, place.location.longitude]
         }
       }, function (err, response) {
-        callback(err, response);
+        callback(err, {
+          place: place,
+          response: response 
+        });
       });
     }
     

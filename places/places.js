@@ -5,11 +5,6 @@
   var async = require("async");
   var db = require(__dirname + "/../db/db.js");
   var index = require(__dirname + "/../index/index.js");
-  var FoursquarePlaceProvider = require(__dirname + '/foursquare/foursquareplaceprovider.js');
-  
-  var placeProviders = [
-    new FoursquarePlaceProvider()
-  ];
 
   class Places {
     
@@ -34,23 +29,8 @@
       });
     }
     
-    _searchFromProviders (topLeft, bottomRight, callback) {
-      var calls = _.map(placeProviders, function (placeProvider) {
-        return function (providerPallback) {
-          placeProvider.search(topLeft, bottomRight, providerPallback);
-        }
-      });
-      
-      async.parallel(calls, function (err, results) {
-        if (err) {
-          callback(err);
-        } else {
-          callback(null, _.flatten(results, true));
-        }
-      });
-    }
-    
     search (topLeft, bottomRight, mainCallback) {
+      /**
       this._searchFromIndex(topLeft, bottomRight, function (indexErr, searchResults) {
         if (indexErr) {
           mainCallback(indexErr);
@@ -68,6 +48,7 @@
           }
         }
       }.bind(this));
+      **/
     }
     
   };

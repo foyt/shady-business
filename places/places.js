@@ -30,7 +30,6 @@
     }
     
     search (topLeft, bottomRight, mainCallback) {
-      /**
       this._searchFromIndex(topLeft, bottomRight, function (indexErr, searchResults) {
         if (indexErr) {
           mainCallback(indexErr);
@@ -38,21 +37,14 @@
           if (searchResults && searchResults.length) {
             mainCallback(null, searchResults);
           } else {
-            this._searchFromProviders(topLeft, bottomRight, function (providerErr, providerResults) {
-              if (providerErr) {
-                mainCallback(providerErr);
-              } else {
-                mainCallback(null, providerResults);
-              }
-            });
+            mainCallback(null, []);
           }
         }
       }.bind(this));
-      **/
     }
     
   };
   
-  module.exports = new Places();
+  module.exports = Places;
 
 }).call(this);

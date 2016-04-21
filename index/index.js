@@ -118,9 +118,9 @@
         index: 'shadybusiness',
         type: 'place',
         body: {
-          query: {
-            filtered: {
-              filter: {
+          "query": {
+            "filtered": {
+              "filter": {
                 "geo_bounding_box": {
                   "location": {
                     "top_left" : [topLeft.latitude, topLeft.longitude],

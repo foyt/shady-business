@@ -114,7 +114,7 @@
       this._socket = socketCluster.connect();
       
       this._socket.on('connect', $.proxy(this._onSocketConnect, this));
-      this._socket.on('discoveredPlaces', $.proxy(this._onDiscoveredPlaces, this));
+      this._socket.on('places:near', $.proxy(this._onPlacesNear, this));
       $(document).on("mapLocationChange", $.proxy(this._onMapLocationChange, this));
     },
     
@@ -122,7 +122,9 @@
       this._connected = true;
     },
     
-    _onDiscoveredPlaces: function (places) {
+    _onPlacesNear: function (data) {
+      var places = data.places;
+      
       var newPlaces = _.filter(places, $.proxy(function (place) {
         return _.indexOf(this._knownPlaceIds, place.id) == -1;
       }, this));
@@ -135,7 +137,7 @@
     },
     
     _onMapLocationChange: function (event, data) {
-      this._socket.emit('searchPlaces', {
+      this._socket.emit('player:screen-move', {
         topLeft: data.topLeft,
         bottomRight: data.bottomRight
       });

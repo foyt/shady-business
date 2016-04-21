@@ -3,7 +3,7 @@ var express = require('express');
 var serveStatic = require('serve-static');
 var path = require('path');
 var config = require(__dirname + '/config.json');
-var places = require(__dirname + '/places/places.js');
+var Places = require(__dirname + '/places/places.js');
 var Scanner = require(__dirname + '/scanner/scanner.js');
 var PlacePersister = require(__dirname + '/places/persister.js');
 var PlaceIndexer = require(__dirname + '/places/indexer.js');
@@ -22,6 +22,7 @@ module.exports.run = function (worker) {
   var scanner = new Scanner();
   var placePersister = new PlacePersister();
   var placeIndexer = new PlaceIndexer();
+  var places = new Places();
   
   app.get('/', function(req, res) {
     res.render('index', { 
@@ -31,13 +32,14 @@ module.exports.run = function (worker) {
   httpServer.on('request', app);
 
   scServer.on('connection', function (socket) {
-    socket.on('searchPlaces', function (data) {
+    
+    socket.on('player:screen-move', function (data) {
       places.search(data.topLeft, data.bottomRight, function (err, places) {
         if (err) {
           // todo: handle err
-          console.log(err);
+          console.error(err);
         } else {
-          socket.emit('discoveredPlaces', places);
+          socket.emit('places:near', { places: places } );
         }
       });
     });

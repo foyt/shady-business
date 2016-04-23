@@ -1,2 +1,2 @@
-Shady Bussiness
+Shady Business
 ======
